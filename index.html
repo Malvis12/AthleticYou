@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Athletic You | Workout Simplified</title>
+    <meta name="description" content="Precision-engineered, space-efficient home workout hardware. Experience Apple-tier design and elite athletic gear.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Syne:wght@700;800;900&family=Alex+Brush&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Floating Glassmorphic Header -->
+    <nav class="floating-header" id="main-nav">
+        <a href="#" class="nav-brand">
+            <img src="assets/logo.png" alt="Athletic You Logo" class="brand-logo">
+            <span class="brand-name">ATHLETIC YOU</span>
+        </a>
+
+        <div class="nav-actions">
+            <button class="bag-btn" id="bag-toggle" aria-label="Shopping Bag">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="bag-icon">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+                <span class="bag-count">0</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Cinematic Hero Section -->
+    <section class="hero-section">
+        <div class="hero-bg-glow"></div>
+        <div class="hero-content">
+            <h1 class="hero-title reveal-item">
+                <span>WORKOUT</span>
+                <span>SIMPLIFIED.</span>
+            </h1>
+            <p class="hero-subtitle reveal-item">Transform Any Space Into Your Arena.</p>
+            
+            <!-- Hero Interactive Image Toggle -->
+            <div class="hero-product-container reveal-item" id="hero-dumbbell-card">
+                <div class="hero-image-wrapper card-image-container">
+                    <img src="Dumbbell.jpg" alt="Matte Dumbbell - Front View" class="product-image active" data-view="primary">
+                    <img src="AY.jpg" alt="Matte Dumbbell - Detail View" class="product-image" data-view="secondary">
+                </div>
+                <div class="view-toggles">
+                    <button class="toggle-btn active" data-target="primary">Front View</button>
+                    <button class="toggle-btn" data-target="secondary">Detail View</button>
+                </div>
+            </div>
+
+            <div class="hero-cta reveal-item">
+                <a href="#essentials" class="cta-btn">Explore Essentials</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Zero-Friction Bento Grid -->
+    <section class="bento-section" id="bento">
+        <div class="section-header reveal-item">
+            <span class="section-tagline">WORKOUT AT HOME</span>
+            <h2 class="section-title">WHY ATHLETIC YOU?</h2>
+        </div>
+        <div class="bento-grid">
+            <div class="bento-card reveal-item" data-tilt>
+                <div class="bento-card-bg"></div>
+                <div class="bento-content">
+                    <span class="bento-number">01</span>
+                    <h3>No Travel Time</h3>
+                    <p>No travel time, no packing bags, no queues. Your training ground is exactly 10 seconds away, eliminating the 45-minute barrier to entry.</p>
+                </div>
+            </div>
+            <div class="bento-card reveal-item" data-tilt>
+                <div class="bento-card-bg"></div>
+                <div class="bento-content">
+                    <span class="bento-number">02</span>
+                    <h3>Space Saving</h3>
+                    <p>Gym-grade hardware designed to retract elegantly into your living environment. Your space remains a sanctuary, transforming only when you decide.</p>
+                </div>
+            </div>
+            <div class="bento-card reveal-item" data-tilt>
+                <div class="bento-card-bg"></div>
+                <div class="bento-content">
+                    <span class="bento-number">03</span>
+                    <h3>No Setup Required</h3>
+                    <p>No check-ins, no keycards, no distractions. Direct physical utility designed for immediate engagement when a window in your schedule opens.</p>
+                </div>
+            </div>
+            <div class="bento-card reveal-item" data-tilt>
+                <div class="bento-card-bg"></div>
+                <div class="bento-content">
+                    <span class="bento-number">04</span>
+                    <h3>Fits Your Schedule</h3>
+                    <p>Whether you have a 15-minute high-intensity block between calls or a dedicated 1-hour session, your equipment matches your schedule, not the other way around.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Editorial Product Showcases -->
+    
+    <!-- Section: Core Products -->
+    <section class="showcase-section" id="essentials">
+        <div class="section-header reveal-item">
+            <span class="section-tagline">FOUNDATION GEAR</span>
+            <h2 class="section-title">CORE PRODUCTS</h2>
+        </div>
+        
+        <div class="showcase-container reveal-item">
+            <!-- Dumbbell Card -->
+            <div class="product-card" data-tilt>
+                <div class="product-card-inner">
+                    <div class="card-image-container">
+                        <img src="https://images.pexels.com/photos/6550849/pexels-photo-6550849.jpeg" alt="Matte Dumbbell" class="product-image active" data-view="primary">
+                        <img src="https://images.pexels.com/photos/16567048/pexels-photo-16567048.jpeg" alt="Matte Dumbbell Detail" class="product-image" data-view="secondary">
+                    </div>
+                    <div class="view-toggles">
+                        <button class="toggle-btn active" data-target="primary">Front</button>
+                        <button class="toggle-btn" data-target="secondary">Detail</button>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-meta">
+                            <span class="product-cat">Weights</span>
+                            <span class="product-price">$240</span>
+                        </div>
+                        <h3 class="product-title">Dumbbells</h3>
+                        <p class="product-description">Solid cast-iron dumbbells with knurled handles for a secure grip.</p>
+                        <button class="add-to-bag-btn" data-name="Dumbbells" data-price="240">Add to Bag</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kettlebell Card -->
+            <div class="product-card" data-tilt>
+                <div class="product-card-inner">
+                    <div class="card-image-container">
+                        <img src="https://images.pexels.com/photos/13863727/pexels-photo-13863727.jpeg" alt="Kettlebell" class="product-image active" data-view="primary">
+                        <img src="https://images.pexels.com/photos/221247/pexels-photo-221247.jpeg" alt="Kettlebell Detail" class="product-image" data-view="secondary">
+                    </div>
+                    <div class="view-toggles">
+                        <button class="toggle-btn active" data-target="primary">Front</button>
+                        <button class="toggle-btn" data-target="secondary">Detail</button>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-meta">
+                            <span class="product-cat">Weights</span>
+                            <span class="product-price">$180</span>
+                        </div>
+                        <h3 class="product-title">Kettlebells</h3>
+                        <p class="product-description">Cast iron kettlebells with wide handles for swings and squats.</p>
+                        <button class="add-to-bag-btn" data-name="Kettlebells" data-price="180">Add to Bag</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bands Card -->
+            <div class="product-card" data-tilt>
+                <div class="product-card-inner">
+                    <div class="card-image-container">
+                        <img src="https://images.pexels.com/photos/19330505/pexels-photo-19330505.jpeg" alt="Bands" class="product-image active" data-view="primary">
+                        <img src="https://images.pexels.com/photos/8809599/pexels-photo-8809599.jpeg" alt="Bands Detail" class="product-image" data-view="secondary">
+                    </div>
+                    <div class="view-toggles">
+                        <button class="toggle-btn active" data-target="primary">Front</button>
+                        <button class="toggle-btn" data-target="secondary">Detail</button>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-meta">
+                            <span class="product-cat">Accessories</span>
+                            <span class="product-price">$65</span>
+                        </div>
+                        <h3 class="product-title">Resistance Bands</h3>
+                        <p class="product-description">Durable elastic bands for stretching and strength training.</p>
+                        <button class="add-to-bag-btn" data-name="Resistance Bands" data-price="65">Add to Bag</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jump Rope Card -->
+            <div class="product-card" data-tilt>
+                <div class="product-card-inner">
+                    <div class="card-image-container">
+                        <img src="https://images.pexels.com/photos/8478702/pexels-photo-8478702.jpeg" alt="Jump Rope" class="product-image active" data-view="primary">
+                        <img src="https://images.pexels.com/photos/8032916/pexels-photo-8032916.jpeg" alt="Jump Rope Detail" class="product-image" data-view="secondary">
+                    </div>
+                    <div class="view-toggles">
+                        <button class="toggle-btn active" data-target="primary">Front</button>
+                        <button class="toggle-btn" data-target="secondary">Detail</button>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-meta">
+                            <span class="product-cat">Accessories</span>
+                            <span class="product-price">$80</span>
+                        </div>
+                        <h3 class="product-title">Jump Rope</h3>
+                        <p class="product-description">Adjustable speed jump rope for conditioning and cardio training.</p>
+                        <button class="add-to-bag-btn" data-name="Jump Rope" data-price="80">Add to Bag</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yoga Mat Card -->
+            <div class="product-card" data-tilt>
+                <div class="product-card-inner">
+                    <div class="card-image-container">
+                        <img src="https://images.pexels.com/photos/4325462/pexels-photo-4325462.jpeg" alt="Yoga Mat" class="product-image active" data-view="primary">
+                        <img src="https://images.pexels.com/photos/4325439/pexels-photo-4325439.jpeg" alt="Yoga Mat Detail" class="product-image" data-view="secondary">
+                    </div>
+                    <div class="view-toggles">
+                        <button class="toggle-btn active" data-target="primary">Front</button>
+                        <button class="toggle-btn" data-target="secondary">Detail</button>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-meta">
+                            <span class="product-cat">Floor Mats</span>
+                            <span class="product-price">$110</span>
+                        </div>
+                        <h3 class="product-title">Yoga Mat</h3>
+                        <p class="product-description">Thick, non-slip textured yoga mat for joint cushioning and comfort.</p>
+                        <button class="add-to-bag-btn" data-name="Yoga Mat" data-price="110">Add to Bag</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ab Roller Card -->
+            <div class="product-card" data-tilt>
+                <div class="product-card-inner">
+                    <div class="card-image-container">
+                        <img src="https://images.pexels.com/photos/8033019/pexels-photo-8033019.jpeg" alt="Ab Roller" class="product-image active" data-view="primary">
+                        <img src="https://images.pexels.com/photos/8544613/pexels-photo-8544613.jpeg" alt="Ab Roller Detail" class="product-image" data-view="secondary">
+                    </div>
+                    <div class="view-toggles">
+                        <button class="toggle-btn active" data-target="primary">Front</button>
+                        <button class="toggle-btn" data-target="secondary">Detail</button>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-meta">
+                            <span class="product-cat">Core</span>
+                            <span class="product-price">$95</span>
+                        </div>
+                        <h3 class="product-title">Ab Roller</h3>
+                        <p class="product-description">Wide wheel ab roller with soft foam handles for core exercises.</p>
+                        <button class="add-to-bag-btn" data-name="Ab Roller" data-price="95">Add to Bag</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exercise Ball Card -->
+            <div class="product-card" data-tilt>
+                <div class="product-card-inner">
+                    <div class="card-image-container">
+                        <img src="https://images.pexels.com/photos/32610335/pexels-photo-32610335.jpeg" alt="Exercise Ball" class="product-image active" data-view="primary">
+                        <img src="https://images.pexels.com/photos/8846511/pexels-photo-8846511.jpeg" alt="Exercise Ball Detail" class="product-image" data-view="secondary">
+                    </div>
+                    <div class="view-toggles">
+                        <button class="toggle-btn active" data-target="primary">Front</button>
+                        <button class="toggle-btn" data-target="secondary">Detail</button>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-meta">
+                            <span class="product-cat">Stability</span>
+                            <span class="product-price">$85</span>
+                        </div>
+                        <h3 class="product-title">Exercise Ball</h3>
+                        <p class="product-description">Durable stability ball for core strengthening and flexibility training.</p>
+                        <button class="add-to-bag-btn" data-name="Exercise Ball" data-price="85">Add to Bag</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pull-Up Bar Card -->
+            <div class="product-card" data-tilt>
+                <div class="product-card-inner">
+                    <div class="card-image-container">
+                        <img src="https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRkCM6ecPwkdXQW_AhZUAKupifnPGX2NdHZrlrifPDG5Ysa2IhSbxjP79MCW60j28LPF56l8-lNKdSDFb2OE_h0vY83zYuLuLifauEU2e0&usqp=CAc" alt="Pull-Up Bar" class="product-image active" data-view="primary">
+                        <img src="https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQ4hEhaT1Ht-7uZrksLTBMzV9RqDua5zuT0kuM7A93VawbKx-z08kFKrAv3QmW69QQ9Ri5sbvW8Gwvcy8Pq_IBlSu_6WA8tKy_bt3UnNrAy-HESKu7JWoJHhI4&usqp=CAc" alt="Pull-Up Bar Detail" class="product-image" data-view="secondary">
+                    </div>
+                    <div class="view-toggles">
+                        <button class="toggle-btn active" data-target="primary">Front</button>
+                        <button class="toggle-btn" data-target="secondary">Detail</button>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-meta">
+                            <span class="product-cat">Bodyweight</span>
+                            <span class="product-price">$150</span>
+                        </div>
+                        <h3 class="product-title">Pull-Up Bar</h3>
+                        <p class="product-description">Heavy-duty door frame bar with multiple padded grip handles.</p>
+                        <button class="add-to-bag-btn" data-name="Pull-Up Bar" data-price="150">Add to Bag</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: Advanced Products -->
+    <section class="showcase-section" id="heavy">
+        <div class="section-header reveal-item">
+            <span class="section-tagline">ELITE PERFORMANCE</span>
+            <h2 class="section-title">ADVANCED PRODUCTS</h2>
+        </div>
+        
+        <div class="showcase-container reveal-item">
+            <!-- Treadmill Card -->
+            <div class="product-card" data-tilt>
+                <div class="product-card-inner">
+                    <div class="card-image-container">
+                        <img src="https://images.pexels.com/photos/5411023/pexels-photo-5411023.jpeg" alt="Treadmill" class="product-image active" data-view="primary">
+                        <img src="https://images.pexels.com/photos/31012865/pexels-photo-31012865.jpeg" alt="Treadmill Detail" class="product-image" data-view="secondary">
+                    </div>
+                    <div class="view-toggles">
+                        <button class="toggle-btn active" data-target="primary">Front</button>
+                        <button class="toggle-btn" data-target="secondary">Detail</button>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-meta">
+                            <span class="product-cat">Cardio</span>
+                            <span class="product-price">$1850</span>
+                        </div>
+                        <h3 class="product-title">Treadmill</h3>
+                        <p class="product-description">Foldable running treadmill with adjustable speed and built-in screen.</p>
+                        <button class="add-to-bag-btn" data-name="Treadmill" data-price="1850">Add to Bag</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Adjustable Weight Bench Card -->
+            <div class="product-card" data-tilt>
+                <div class="product-card-inner">
+                    <div class="card-image-container">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRfnA9NFP_ZdbENITN9dp8EQeEU_piVWb8XLdw5XIrB-A&s=10" alt="Adjustable Weight Bench" class="product-image active" data-view="primary">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxmhpi9WgZ5McqBHuZOs3q34JQdIsjl5q9tCSqWjhBWw&s" alt="Bench Detail" class="product-image" data-view="secondary">
+                    </div>
+                    <div class="view-toggles">
+                        <button class="toggle-btn active" data-target="primary">Front</button>
+                        <button class="toggle-btn" data-target="secondary">Detail</button>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-meta">
+                            <span class="product-cat">Weights</span>
+                            <span class="product-price">$450</span>
+                        </div>
+                        <h3 class="product-title">Adjustable Weight Bench</h3>
+                        <p class="product-description">Adjustable weight bench for flat, incline, and decline training.</p>
+                        <button class="add-to-bag-btn" data-name="Adjustable Weight Bench" data-price="450">Add to Bag</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barbell and Weight Plates Card -->
+            <div class="product-card" data-tilt>
+                <div class="product-card-inner">
+                    <div class="card-image-container">
+                        <img src="https://images.pexels.com/photos/7811528/pexels-photo-7811528.jpeg" alt="Barbell and Weight Plates" class="product-image active" data-view="primary">
+                        <img src="https://images.pexels.com/photos/28636776/pexels-photo-28636776.png" alt="Barbell Detail" class="product-image" data-view="secondary">
+                    </div>
+                    <div class="view-toggles">
+                        <button class="toggle-btn active" data-target="primary">Front</button>
+                        <button class="toggle-btn" data-target="secondary">Detail</button>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-meta">
+                            <span class="product-cat">Weights</span>
+                            <span class="product-price">$590</span>
+                        </div>
+                        <h3 class="product-title">Barbell and Weight Plates</h3>
+                        <p class="product-description">Solid steel weight bar complete with secure spring collar locks and plates.</p>
+                        <button class="add-to-bag-btn" data-name="Barbell and Weight Plates" data-price="590">Add to Bag</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Core Sliders Card -->
+            <div class="product-card" data-tilt>
+                <div class="product-card-inner">
+                    <div class="card-image-container">
+                        <img src="assets/sliders_front.svg" alt="Core Sliders" class="product-image active" data-view="primary">
+                        <img src="assets/sliders_detail.svg" alt="Core Sliders Detail" class="product-image" data-view="secondary">
+                    </div>
+                    <div class="view-toggles">
+                        <button class="toggle-btn active" data-target="primary">Front</button>
+                        <button class="toggle-btn" data-target="secondary">Detail</button>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-meta">
+                            <span class="product-cat">Core</span>
+                            <span class="product-price">$45</span>
+                        </div>
+                        <h3 class="product-title">Core Sliders</h3>
+                        <p class="product-description">Double-sided sliding discs for low-impact core training workouts.</p>
+                        <button class="add-to-bag-btn" data-name="Core Sliders" data-price="45">Add to Bag</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suspension Trainer Card -->
+            <div class="product-card" data-tilt>
+                <div class="product-card-inner">
+                    <div class="card-image-container">
+                        <img src="https://images.pexels.com/photos/414029/pexels-photo-414029.jpeg" alt="Suspension Trainer" class="product-image active" data-view="primary">
+                        <img src="https://images.pexels.com/photos/8436148/pexels-photo-8436148.jpeg" alt="Suspension Trainer Detail" class="product-image" data-view="secondary">
+                    </div>
+                    <div class="view-toggles">
+                        <button class="toggle-btn active" data-target="primary">Front</button>
+                        <button class="toggle-btn" data-target="secondary">Detail</button>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-meta">
+                            <span class="product-cat">Bodyweight</span>
+                            <span class="product-price">$220</span>
+                        </div>
+                        <h3 class="product-title">Suspension Trainer</h3>
+                        <p class="product-description">Adjustable straps and anchors for full-body resistance exercises.</p>
+                        <button class="add-to-bag-btn" data-name="Suspension Trainer" data-price="220">Add to Bag</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Punching Bag and Gloves Card -->
+            <div class="product-card" data-tilt>
+                <div class="product-card-inner">
+                    <div class="card-image-container">
+                        <img src="https://images.pexels.com/photos/6296105/pexels-photo-6296105.jpeg" alt="Punching Bag and Gloves" class="product-image active" data-view="primary">
+                        <img src="https://images.pexels.com/photos/5580064/pexels-photo-5580064.jpeg" alt="Punching Bag Detail" class="product-image" data-view="secondary">
+                    </div>
+                    <div class="view-toggles">
+                        <button class="toggle-btn active" data-target="primary">Front</button>
+                        <button class="toggle-btn" data-target="secondary">Detail</button>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-meta">
+                            <span class="product-cat">Boxing</span>
+                            <span class="product-price">$380</span>
+                        </div>
+                        <h3 class="product-title">Punching Bag and Gloves</h3>
+                        <p class="product-description">Hanging heavy punching bag paired with padded boxing gloves.</p>
+                        <button class="add-to-bag-btn" data-name="Punching Bag and Gloves" data-price="380">Add to Bag</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medicine Ball Card -->
+            <div class="product-card" data-tilt>
+                <div class="product-card-inner">
+                    <div class="card-image-container">
+                        <img src="https://images.pexels.com/photos/4720565/pexels-photo-4720565.jpeg" alt="Medicine Ball" class="product-image active" data-view="primary">
+                        <img src="https://images.pexels.com/photos/37955627/pexels-photo-37955627.jpeg" alt="Medicine Ball Detail" class="product-image" data-view="secondary">
+                    </div>
+                    <div class="view-toggles">
+                        <button class="toggle-btn active" data-target="primary">Front</button>
+                        <button class="toggle-btn" data-target="secondary">Detail</button>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-meta">
+                            <span class="product-cat">Weights</span>
+                            <span class="product-price">$125</span>
+                        </div>
+                        <h3 class="product-title">Medicine Ball</h3>
+                        <p class="product-description">Heavy medicine ball for explosive movements and functional training.</p>
+                        <button class="add-to-bag-btn" data-name="Medicine Ball" data-price="125">Add to Bag</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Shopping Bag Side Drawer -->
+    <div class="bag-drawer" id="bag-drawer">
+        <div class="drawer-header">
+            <h3>Your Bag</h3>
+            <button class="close-drawer-btn" id="close-bag">×</button>
+        </div>
+        <div class="drawer-items" id="bag-items-list">
+            <!-- Dynamic Items go here -->
+            <div class="empty-bag-message">Your bag is empty.</div>
+        </div>
+        <div class="drawer-footer">
+            <div class="total-row">
+                <span>Total:</span>
+                <span id="bag-total-amount">$0</span>
+            </div>
+            <button class="checkout-btn">Proceed to Checkout</button>
+        </div>
+    </div>
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+
+    <!-- Minimalist Footer -->
+    <footer class="footer">
+        <div class="footer-columns">
+            <div class="footer-col">
+                <h4>ATHLETIC YOU</h4>
+                <p>Architecting the future of physical wellness. Space-efficient training equipment for high performance home arenas.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Collections</h4>
+                <ul>
+                    <li><a href="#essentials">Core Products</a></li>
+                    <li><a href="#heavy">Advanced Products</a></li>
+                    <li><a href="#bento">Why Athletic You</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#">Warranty Registry</a></li>
+                    <li><a href="#">Shipping & Returns</a></li>
+                    <li><a href="#">Architect Partnership</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <ul>
+                    <li><a href="#">press@athleticyou.com</a></li>
+                    <li><a href="#">studios@athleticyou.com</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Athletic You. All rights reserved.</p>
+            <div class="footer-tagline">Workout Simplified</div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>
