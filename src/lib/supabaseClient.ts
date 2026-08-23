@@ -1,53 +1,27 @@
 import { Product } from '../types/product';
 import { CustomerOrder, OrderStatus, StoreSettings, NigerianStateSetting } from '../types/store';
 
-const DEFAULT_SUPABASE_URL = 'https://dfkcvrluvvuirwestatp.supabase.co';
-const DEFAULT_SUPABASE_ANON_KEY =
+export const SUPABASE_URL = 'https://dfkcvrluvvuirwestatp.supabase.co';
+export const SUPABASE_ANON_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRma2N2cmx1dnZ1aXJ3ZXN0YXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1MDQ0OTEsImV4cCI6MjEwMzA4MDQ5MX0.iZXXsgJp4vDlrJfvAEM9PvVqQMyyzH09H0lEbpbIdhs';
 
-// Reads from localStorage, environment variables, or hardcoded project defaults
-export const getSupabaseConfig = () => {
-  const envUrl = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) || '';
-  const envKey = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_ANON_KEY) || '';
-
-  const storedUrl = localStorage.getItem('ay_supabase_url') || '';
-  const storedKey = localStorage.getItem('ay_supabase_key') || '';
-
-  const url = (storedUrl || envUrl || DEFAULT_SUPABASE_URL).trim().replace(/\/$/, '');
-  const anonKey = (storedKey || envKey || DEFAULT_SUPABASE_ANON_KEY).trim();
-
-  return {
-    url,
-    anonKey,
-    isConfigured: Boolean(url && anonKey && url.startsWith('http')),
-  };
-};
-
-export const setSupabaseConfig = (url: string, anonKey: string) => {
-  localStorage.setItem('ay_supabase_url', url.trim());
-  localStorage.setItem('ay_supabase_key', anonKey.trim());
-};
-
-const getHeaders = (anonKey: string) => ({
-  apikey: anonKey,
-  Authorization: `Bearer ${anonKey}`,
+const getHeaders = () => ({
+  apikey: SUPABASE_ANON_KEY,
+  Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
   'Content-Type': 'application/json',
   Prefer: 'return=representation',
 });
 
 export const SupabaseAPI = {
-  // 1. PRODUCTS
-  async getProducts(): Promise<Product[] | null> {
-    const { url, anonKey, isConfigured } = getSupabaseConfig();
-    if (!isConfigured) return null;
-
+  // 1. PRODUCTS (Pure Supabase)
+  async getProducts(): Promise<Product[]> {
     try {
-      const res = await fetch(`${url}/rest/v1/products?select=*&order=created_at.asc`, {
-        headers: getHeaders(anonKey),
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=created_at.asc`, {
+        headers: getHeaders(),
       });
       if (!res.ok) throw new Error(`HTTP error ${res.status}`);
       const data = await res.json();
-      if (!data || !Array.isArray(data)) return null;
+      if (!data || !Array.isArray(data)) return [];
 
       return data.map((row: any) => ({
         id: row.id,
@@ -71,19 +45,16 @@ export const SupabaseAPI = {
         inStock: row.in_stock !== false,
       }));
     } catch (err) {
-      console.warn('[Supabase] Failed to fetch products:', err);
-      return null;
+      console.error('[Supabase] Error fetching products:', err);
+      return [];
     }
   },
 
   async insertProduct(product: Product): Promise<boolean> {
-    const { url, anonKey, isConfigured } = getSupabaseConfig();
-    if (!isConfigured) return false;
-
     try {
-      const res = await fetch(`${url}/rest/v1/products`, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/products`, {
         method: 'POST',
-        headers: getHeaders(anonKey),
+        headers: getHeaders(),
         body: JSON.stringify({
           id: product.id,
           name: product.name,
@@ -100,15 +71,12 @@ export const SupabaseAPI = {
       });
       return res.ok;
     } catch (err) {
-      console.warn('[Supabase] Failed to insert product:', err);
+      console.error('[Supabase] Error inserting product:', err);
       return false;
     }
   },
 
   async updateProduct(id: string, updates: Partial<Product> & { imageUrl?: string }): Promise<boolean> {
-    const { url, anonKey, isConfigured } = getSupabaseConfig();
-    if (!isConfigured) return false;
-
     const payload: any = {};
     if (updates.name !== undefined) payload.name = updates.name;
     if (updates.category !== undefined) payload.category = updates.category;
@@ -121,45 +89,41 @@ export const SupabaseAPI = {
     if (updates.inStock !== undefined) payload.in_stock = updates.inStock;
 
     try {
-      const res = await fetch(`${url}/rest/v1/products?id=eq.${id}`, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${id}`, {
         method: 'PATCH',
-        headers: getHeaders(anonKey),
+        headers: getHeaders(),
         body: JSON.stringify(payload),
       });
       return res.ok;
     } catch (err) {
-      console.warn('[Supabase] Failed to update product:', err);
+      console.error('[Supabase] Error updating product:', err);
       return false;
     }
   },
 
   async deleteProduct(id: string): Promise<boolean> {
-    const { url, anonKey, isConfigured } = getSupabaseConfig();
-    if (!isConfigured) return false;
-
     try {
-      const res = await fetch(`${url}/rest/v1/products?id=eq.${id}`, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${id}`, {
         method: 'DELETE',
-        headers: getHeaders(anonKey),
+        headers: getHeaders(),
       });
       return res.ok;
     } catch (err) {
-      console.warn('[Supabase] Failed to delete product:', err);
+      console.error('[Supabase] Error deleting product:', err);
       return false;
     }
   },
 
-  // 2. ORDERS
-  async getOrders(): Promise<CustomerOrder[] | null> {
-    const { url, anonKey, isConfigured } = getSupabaseConfig();
-    if (!isConfigured) return null;
-
+  // 2. ORDERS (Pure Supabase)
+  async getOrders(): Promise<CustomerOrder[]> {
     try {
-      const res = await fetch(`${url}/rest/v1/orders?select=*&order=created_at.desc`, {
-        headers: getHeaders(anonKey),
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?select=*&order=created_at.desc`, {
+        headers: getHeaders(),
       });
       if (!res.ok) throw new Error(`HTTP error ${res.status}`);
       const data = await res.json();
+      if (!data || !Array.isArray(data)) return [];
+
       return data.map((row: any) => ({
         id: row.id,
         orderNumber: row.order_number,
@@ -180,19 +144,16 @@ export const SupabaseAPI = {
         grandTotal: Number(row.grand_total),
       }));
     } catch (err) {
-      console.warn('[Supabase] Failed to fetch orders:', err);
-      return null;
+      console.error('[Supabase] Error fetching orders:', err);
+      return [];
     }
   },
 
   async insertOrder(order: CustomerOrder): Promise<boolean> {
-    const { url, anonKey, isConfigured } = getSupabaseConfig();
-    if (!isConfigured) return false;
-
     try {
-      const res = await fetch(`${url}/rest/v1/orders`, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
         method: 'POST',
-        headers: getHeaders(anonKey),
+        headers: getHeaders(),
         body: JSON.stringify({
           id: order.id,
           order_number: order.orderNumber,
@@ -215,52 +176,43 @@ export const SupabaseAPI = {
       });
       return res.ok;
     } catch (err) {
-      console.warn('[Supabase] Failed to insert order:', err);
+      console.error('[Supabase] Error inserting order:', err);
       return false;
     }
   },
 
   async updateOrderStatus(id: string, status: OrderStatus): Promise<boolean> {
-    const { url, anonKey, isConfigured } = getSupabaseConfig();
-    if (!isConfigured) return false;
-
     try {
-      const res = await fetch(`${url}/rest/v1/orders?id=eq.${id}`, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${id}`, {
         method: 'PATCH',
-        headers: getHeaders(anonKey),
+        headers: getHeaders(),
         body: JSON.stringify({ status }),
       });
       return res.ok;
     } catch (err) {
-      console.warn('[Supabase] Failed to update order status:', err);
+      console.error('[Supabase] Error updating order status:', err);
       return false;
     }
   },
 
   async deleteOrder(id: string): Promise<boolean> {
-    const { url, anonKey, isConfigured } = getSupabaseConfig();
-    if (!isConfigured) return false;
-
     try {
-      const res = await fetch(`${url}/rest/v1/orders?id=eq.${id}`, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${id}`, {
         method: 'DELETE',
-        headers: getHeaders(anonKey),
+        headers: getHeaders(),
       });
       return res.ok;
     } catch (err) {
-      console.warn('[Supabase] Failed to delete order:', err);
+      console.error('[Supabase] Error deleting order:', err);
       return false;
     }
   },
 
-  // 3. SETTINGS
+  // 3. SETTINGS (Pure Supabase)
   async getSettings(): Promise<StoreSettings | null> {
-    const { url, anonKey, isConfigured } = getSupabaseConfig();
-    if (!isConfigured) return null;
-
     try {
-      const res = await fetch(`${url}/rest/v1/store_settings?select=*&limit=1`, {
-        headers: getHeaders(anonKey),
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/store_settings?select=*&limit=1`, {
+        headers: getHeaders(),
       });
       if (!res.ok) return null;
       const data = await res.json();
@@ -278,22 +230,19 @@ export const SupabaseAPI = {
         heroSubheadline: row.hero_subheadline,
         heroSubtitle: row.hero_subtitle,
         heroImageUrl: row.hero_image_url || '/Dumbbell.jpg',
-        marqueeTexts: row.marquee_texts || [],
+        marqueeTexts: Array.isArray(row.marquee_texts) ? row.marquee_texts : JSON.parse(row.marquee_texts || '[]'),
       };
     } catch (err) {
-      console.warn('[Supabase] Failed to fetch settings:', err);
+      console.error('[Supabase] Error fetching settings:', err);
       return null;
     }
   },
 
   async saveSettings(settings: StoreSettings): Promise<boolean> {
-    const { url, anonKey, isConfigured } = getSupabaseConfig();
-    if (!isConfigured) return false;
-
     try {
-      const res = await fetch(`${url}/rest/v1/store_settings?id=eq.default`, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/store_settings?id=eq.default`, {
         method: 'PATCH',
-        headers: getHeaders(anonKey),
+        headers: getHeaders(),
         body: JSON.stringify({
           store_name: settings.storeName,
           tagline: settings.tagline,
@@ -311,23 +260,20 @@ export const SupabaseAPI = {
       });
       return res.ok;
     } catch (err) {
-      console.warn('[Supabase] Failed to save settings:', err);
+      console.error('[Supabase] Error saving settings:', err);
       return false;
     }
   },
 
-  // 4. SHIPPING
-  async getShipping(): Promise<NigerianStateSetting[] | null> {
-    const { url, anonKey, isConfigured } = getSupabaseConfig();
-    if (!isConfigured) return null;
-
+  // 4. SHIPPING (Pure Supabase)
+  async getShipping(): Promise<NigerianStateSetting[]> {
     try {
-      const res = await fetch(`${url}/rest/v1/shipping_rates?select=*`, {
-        headers: getHeaders(anonKey),
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/shipping_rates?select=*`, {
+        headers: getHeaders(),
       });
-      if (!res.ok) return null;
+      if (!res.ok) return [];
       const data = await res.json();
-      if (!data || data.length === 0) return null;
+      if (!data || !Array.isArray(data)) return [];
       return data.map((r: any) => ({
         code: r.code,
         name: r.name,
@@ -335,19 +281,16 @@ export const SupabaseAPI = {
         deliveryDays: r.delivery_days,
       }));
     } catch (err) {
-      console.warn('[Supabase] Failed to fetch shipping:', err);
-      return null;
+      console.error('[Supabase] Error fetching shipping rates:', err);
+      return [];
     }
   },
 
   async updateShippingState(code: string, fee: number, deliveryDays: string): Promise<boolean> {
-    const { url, anonKey, isConfigured } = getSupabaseConfig();
-    if (!isConfigured) return false;
-
     try {
-      const res = await fetch(`${url}/rest/v1/shipping_rates?code=eq.${code}`, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/shipping_rates?code=eq.${code}`, {
         method: 'PATCH',
-        headers: getHeaders(anonKey),
+        headers: getHeaders(),
         body: JSON.stringify({
           fee,
           delivery_days: deliveryDays,
@@ -355,7 +298,7 @@ export const SupabaseAPI = {
       });
       return res.ok;
     } catch (err) {
-      console.warn('[Supabase] Failed to update shipping state:', err);
+      console.error('[Supabase] Error updating shipping rate:', err);
       return false;
     }
   },

@@ -6,34 +6,17 @@ import {
   MessageCircle,
   Type,
   Check,
-  RotateCcw,
   Sparkles,
   Database,
-  Cloud,
   CheckCircle2,
-  AlertCircle,
-  Copy,
   ExternalLink,
 } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
+import { SUPABASE_URL } from '../../lib/supabaseClient';
 
 export const AdminSettings: React.FC = () => {
-  const {
-    storeSettings,
-    updateStoreSettings,
-    resetToDefaults,
-    isCloudConnected,
-    cloudUrl,
-    cloudKey,
-    connectCloudDatabase,
-  } = useStore();
-
+  const { storeSettings, updateStoreSettings } = useStore();
   const [saved, setSaved] = useState(false);
-  const [supabaseUrl, setSupabaseUrl] = useState(cloudUrl || '');
-  const [supabaseKey, setSupabaseKey] = useState(cloudKey || '');
-  const [cloudConnecting, setCloudConnecting] = useState(false);
-  const [cloudSuccess, setCloudSuccess] = useState<boolean | null>(null);
-  const [copiedSql, setCopiedSql] = useState(false);
 
   const [form, setForm] = useState({
     storeName: storeSettings.storeName,
@@ -52,9 +35,9 @@ export const AdminSettings: React.FC = () => {
     marqueeText4: storeSettings.marqueeTexts[3] || 'PREMIUM TRAINING SYSTEMS',
   });
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateStoreSettings({
+    await updateStoreSettings({
       storeName: form.storeName,
       tagline: form.tagline,
       whatsappNumber: form.whatsappNumber,
@@ -79,120 +62,48 @@ export const AdminSettings: React.FC = () => {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const handleConnectCloud = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setCloudConnecting(true);
-    setCloudSuccess(null);
-
-    const ok = await connectCloudDatabase(supabaseUrl, supabaseKey);
-    setCloudConnecting(false);
-    setCloudSuccess(ok);
-  };
-
   return (
     <div className="space-y-8 max-w-4xl">
-      {/* 0. Cloud Database Connection (Supabase) */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-brand-purple/10 to-onyx-surface/80 border border-brand-purple/30 shadow-2xl space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-brand-purple/20 border border-brand-purple/40 flex items-center justify-center text-brand-purple-light">
-              <Database className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-heading font-black text-lg text-white">
-                  CLOUD DATABASE SYNC (SUPABASE)
-                </h3>
-                {isCloudConnected ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" />
-                    <span>LIVE CLOUD SYNC ACTIVE</span>
-                  </span>
-                ) : (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-zinc-700/50 text-zinc-400 border border-white/10">
-                    LOCAL BROWSER MODE
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-zinc-400 mt-0.5">
-                Connect your free Supabase project so your product edits and prices sync across every phone and computer globally.
-              </p>
-            </div>
+      {/* Supabase Cloud Live Status */}
+      <div className="p-6 sm:p-7 rounded-3xl bg-gradient-to-b from-brand-purple/15 to-onyx-surface/80 border border-brand-purple/30 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+            <Database className="w-6 h-6" />
           </div>
-
-          <a
-            href="https://supabase.com/dashboard"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 font-mono text-xs border border-white/10 transition-colors w-fit"
-          >
-            <span>Open Supabase</span>
-            <ExternalLink className="w-3 h-3" />
-          </a>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-heading font-black text-base sm:text-lg text-white">
+                SUPABASE CLOUD DATABASE
+              </h3>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3" />
+                <span>CONNECTED DIRECTLY</span>
+              </span>
+            </div>
+            <p className="text-xs text-zinc-400 mt-0.5 font-mono">
+              Endpoint: {SUPABASE_URL}
+            </p>
+          </div>
         </div>
 
-        <form onSubmit={handleConnectCloud} className="space-y-4 pt-2">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-mono uppercase text-zinc-400 block mb-1.5 font-bold">
-                Project URL (e.g. https://xyz.supabase.co)
-              </label>
-              <input
-                type="url"
-                required
-                value={supabaseUrl}
-                onChange={(e) => setSupabaseUrl(e.target.value)}
-                placeholder="https://your-project-id.supabase.co"
-                className="w-full px-4 py-3 rounded-xl bg-black/50 border border-white/10 text-white placeholder-zinc-600 text-xs focus:border-brand-purple font-mono"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-mono uppercase text-zinc-400 block mb-1.5 font-bold">
-                Anon Public Key
-              </label>
-              <input
-                type="text"
-                required
-                value={supabaseKey}
-                onChange={(e) => setSupabaseKey(e.target.value)}
-                placeholder="eyJhbGciOi..."
-                className="w-full px-4 py-3 rounded-xl bg-black/50 border border-white/10 text-white placeholder-zinc-600 text-xs focus:border-brand-purple font-mono"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
-            <div className="text-[11px] text-zinc-400">
-              💡 SQL setup file is ready in project root as <strong className="text-white">supabase_schema.sql</strong>.
-            </div>
-
-            <button
-              type="submit"
-              disabled={cloudConnecting}
-              className="px-5 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-light text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-brand-purple/30 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-            >
-              <Cloud className="w-4 h-4" />
-              <span>{cloudConnecting ? 'Connecting...' : 'Save & Connect Cloud Sync'}</span>
-            </button>
-          </div>
-
-          {cloudSuccess === true && (
-            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 shrink-0" />
-              <span>Connected successfully! Cloud synchronization is active.</span>
-            </div>
-          )}
-        </form>
+        <a
+          href="https://supabase.com/dashboard"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 font-mono text-xs border border-white/10 transition-colors shrink-0 w-fit cursor-pointer"
+        >
+          <span>Supabase Dashboard</span>
+          <ExternalLink className="w-3.5 h-3.5" />
+        </a>
       </div>
 
       {/* Main Storefront Settings Form */}
       <form onSubmit={handleSave} className="space-y-8">
-        {/* Save action floating header */}
+        {/* Save action header */}
         <div className="flex items-center justify-between pb-4 border-b border-white/8">
           <div>
             <h2 className="text-xl font-heading font-black text-white">STOREFRONT SETTINGS</h2>
-            <p className="text-xs text-zinc-400">Configure bank accounts, WhatsApp channels, and hero copy in real time.</p>
+            <p className="text-xs text-zinc-400">All updates write directly to Supabase cloud in real time.</p>
           </div>
           <button
             type="submit"
@@ -205,12 +116,12 @@ export const AdminSettings: React.FC = () => {
             {saved ? (
               <>
                 <Check className="w-4 h-4" />
-                <span>Saved Live!</span>
+                <span>Saved to Supabase!</span>
               </>
             ) : (
               <>
                 <Save className="w-4 h-4" />
-                <span>Save Settings</span>
+                <span>Save to Cloud</span>
               </>
             )}
           </button>
@@ -424,23 +335,6 @@ export const AdminSettings: React.FC = () => {
               />
             </div>
           </div>
-        </div>
-
-        {/* Danger Zone: Factory Reset */}
-        <div className="p-6 rounded-3xl bg-red-500/5 border border-red-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h4 className="text-sm font-bold text-red-400">Reset Storefront to Factory Defaults</h4>
-            <p className="text-xs text-zinc-400 mt-0.5">
-              Restores original catalog products, default bank info, and default Nigerian state shipping rates.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={resetToDefaults}
-            className="px-4 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 font-mono text-xs font-bold transition-all cursor-pointer shrink-0"
-          >
-            Reset All Data
-          </button>
         </div>
       </form>
     </div>

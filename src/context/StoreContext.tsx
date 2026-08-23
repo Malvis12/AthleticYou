@@ -3,14 +3,7 @@ import { Product } from '../types/product';
 import { CustomerOrder, OrderStatus, StoreSettings, NigerianStateSetting } from '../types/store';
 import { PRODUCTS } from '../data/products';
 import { NIGERIAN_STATES } from '../data/shipping';
-import { SupabaseAPI, getSupabaseConfig, setSupabaseConfig } from '../lib/supabaseClient';
-
-const STORAGE_KEYS = {
-  PRODUCTS: 'ay_cms_products_v1',
-  ORDERS: 'ay_cms_orders_v1',
-  SETTINGS: 'ay_cms_settings_v1',
-  SHIPPING: 'ay_cms_shipping_v1',
-};
+import { SupabaseAPI } from '../lib/supabaseClient';
 
 const DEFAULT_SETTINGS: StoreSettings = {
   storeName: 'Athletic You',
@@ -39,77 +32,32 @@ interface StoreContextType {
   orders: CustomerOrder[];
   storeSettings: StoreSettings;
   shippingStates: NigerianStateSetting[];
-  isCloudConnected: boolean;
-  cloudUrl: string;
-  cloudKey: string;
-  connectCloudDatabase: (url: string, key: string) => Promise<boolean>;
-  addProduct: (productData: Omit<Product, 'id' | 'slug' | 'images' | 'rating' | 'reviewCount' | 'features' | 'specifications' | 'includedItems'> & { imageUrl: string }) => void;
-  updateProduct: (id: string, updates: Partial<Product> & { imageUrl?: string }) => void;
-  deleteProduct: (id: string) => void;
-  toggleProductStock: (id: string) => void;
-  addOrder: (orderData: Omit<CustomerOrder, 'id' | 'createdAt' | 'status'>) => CustomerOrder;
-  updateOrderStatus: (orderId: string, status: OrderStatus) => void;
-  deleteOrder: (orderId: string) => void;
-  updateStoreSettings: (settings: Partial<StoreSettings>) => void;
-  updateShippingState: (code: string, fee: number, deliveryDays: string) => void;
-  resetToDefaults: () => void;
-  syncFromCloud: () => Promise<void>;
+  isLoading: boolean;
+  addProduct: (productData: Omit<Product, 'id' | 'slug' | 'images' | 'rating' | 'reviewCount' | 'features' | 'specifications' | 'includedItems'> & { imageUrl: string }) => Promise<void>;
+  updateProduct: (id: string, updates: Partial<Product> & { imageUrl?: string }) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
+  toggleProductStock: (id: string) => Promise<void>;
+  addOrder: (orderData: Omit<CustomerOrder, 'id' | 'createdAt' | 'status'>) => Promise<CustomerOrder>;
+  updateOrderStatus: (orderId: string, status: OrderStatus) => Promise<void>;
+  deleteOrder: (orderId: string) => Promise<void>;
+  updateStoreSettings: (settings: Partial<StoreSettings>) => Promise<void>;
+  updateShippingState: (code: string, fee: number, deliveryDays: string) => Promise<void>;
+  refreshFromSupabase: () => Promise<void>;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const initialCloudConfig = getSupabaseConfig();
-  const [isCloudConnected, setIsCloudConnected] = useState(initialCloudConfig.isConfigured);
-  const [cloudUrl, setCloudUrl] = useState(initialCloudConfig.url);
-  const [cloudKey, setCloudKey] = useState(initialCloudConfig.anonKey);
+  const [products, setProducts] = useState<Product[]>(PRODUCTS);
+  const [orders, setOrders] = useState<CustomerOrder[]>([]);
+  const [storeSettings, setStoreSettings] = useState<StoreSettings>(DEFAULT_SETTINGS);
+  const [shippingStates, setShippingStates] = useState<NigerianStateSetting[]>(NIGERIAN_STATES);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // 1. Products State
-  const [products, setProducts] = useState<Product[]>(() => {
+  // Pure Supabase Sync on Mount
+  const refreshFromSupabase = async () => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
-      return saved ? JSON.parse(saved) : PRODUCTS;
-    } catch {
-      return PRODUCTS;
-    }
-  });
-
-  // 2. Orders State
-  const [orders, setOrders] = useState<CustomerOrder[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.ORDERS);
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  // 3. Settings State
-  const [storeSettings, setStoreSettings] = useState<StoreSettings>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.SETTINGS);
-      return saved ? { ...DEFAULT_SETTINGS, ...JSON.parse(saved) } : DEFAULT_SETTINGS;
-    } catch {
-      return DEFAULT_SETTINGS;
-    }
-  });
-
-  // 4. Shipping States
-  const [shippingStates, setShippingStates] = useState<NigerianStateSetting[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.SHIPPING);
-      return saved ? JSON.parse(saved) : NIGERIAN_STATES;
-    } catch {
-      return NIGERIAN_STATES;
-    }
-  });
-
-  // Fetch remote data on mount if Supabase is connected
-  const syncFromCloud = async () => {
-    const config = getSupabaseConfig();
-    if (!config.isConfigured) return;
-
-    try {
+      setIsLoading(true);
       const [cloudProducts, cloudOrders, cloudSettings, cloudShipping] = await Promise.all([
         SupabaseAPI.getProducts(),
         SupabaseAPI.getOrders(),
@@ -124,90 +72,24 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setOrders(cloudOrders);
       }
       if (cloudSettings) {
-        setStoreSettings((prev) => ({ ...prev, ...cloudSettings }));
+        setStoreSettings(cloudSettings);
       }
       if (cloudShipping && cloudShipping.length > 0) {
         setShippingStates(cloudShipping);
       }
-      setIsCloudConnected(true);
     } catch (err) {
-      console.warn('Cloud sync error:', err);
+      console.error('[Supabase] Initial fetch error:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    syncFromCloud();
+    refreshFromSupabase();
   }, []);
 
-  // Multi-tab listener
-  useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEYS.PRODUCTS && e.newValue) {
-        setProducts(JSON.parse(e.newValue));
-      }
-      if (e.key === STORAGE_KEYS.ORDERS && e.newValue) {
-        setOrders(JSON.parse(e.newValue));
-      }
-      if (e.key === STORAGE_KEYS.SETTINGS && e.newValue) {
-        setStoreSettings(JSON.parse(e.newValue));
-      }
-      if (e.key === STORAGE_KEYS.SHIPPING && e.newValue) {
-        setShippingStates(JSON.parse(e.newValue));
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
-  // Local storage persistence
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [products]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [orders]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(storeSettings));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [storeSettings]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.SHIPPING, JSON.stringify(shippingStates));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [shippingStates]);
-
-  const connectCloudDatabase = async (url: string, key: string): Promise<boolean> => {
-    setSupabaseConfig(url, key);
-    setCloudUrl(url);
-    setCloudKey(key);
-    const config = getSupabaseConfig();
-    setIsCloudConnected(config.isConfigured);
-    if (config.isConfigured) {
-      await syncFromCloud();
-      return true;
-    }
-    return false;
-  };
-
-  // Product CRUD
-  const addProduct = (
+  // 1. Product CRUD (Pure Supabase)
+  const addProduct = async (
     productData: Omit<Product, 'id' | 'slug' | 'images' | 'rating' | 'reviewCount' | 'features' | 'specifications' | 'includedItems'> & { imageUrl: string }
   ) => {
     const slug = productData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -234,10 +116,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     setProducts((prev) => [newProduct, ...prev]);
-    SupabaseAPI.insertProduct(newProduct);
+    await SupabaseAPI.insertProduct(newProduct);
   };
 
-  const updateProduct = (id: string, updates: Partial<Product> & { imageUrl?: string }) => {
+  const updateProduct = async (id: string, updates: Partial<Product> & { imageUrl?: string }) => {
     setProducts((prev) =>
       prev.map((p) => {
         if (p.id === id) {
@@ -255,15 +137,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return p;
       })
     );
-    SupabaseAPI.updateProduct(id, updates);
+    await SupabaseAPI.updateProduct(id, updates);
   };
 
-  const deleteProduct = (id: string) => {
+  const deleteProduct = async (id: string) => {
     setProducts((prev) => prev.filter((p) => p.id !== id));
-    SupabaseAPI.deleteProduct(id);
+    await SupabaseAPI.deleteProduct(id);
   };
 
-  const toggleProductStock = (id: string) => {
+  const toggleProductStock = async (id: string) => {
     const target = products.find((p) => p.id === id);
     if (!target) return;
     const newStock = target.inStock === false;
@@ -271,11 +153,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setProducts((prev) =>
       prev.map((p) => (p.id === id ? { ...p, inStock: newStock } : p))
     );
-    SupabaseAPI.updateProduct(id, { inStock: newStock });
+    await SupabaseAPI.updateProduct(id, { inStock: newStock });
   };
 
-  // Orders Management
-  const addOrder = (orderData: Omit<CustomerOrder, 'id' | 'createdAt' | 'status'>): CustomerOrder => {
+  // 2. Orders Management (Pure Supabase)
+  const addOrder = async (orderData: Omit<CustomerOrder, 'id' | 'createdAt' | 'status'>): Promise<CustomerOrder> => {
     const newOrder: CustomerOrder = {
       ...orderData,
       id: `ord-${Date.now()}`,
@@ -284,47 +166,35 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     setOrders((prev) => [newOrder, ...prev]);
-    SupabaseAPI.insertOrder(newOrder);
+    await SupabaseAPI.insertOrder(newOrder);
     return newOrder;
   };
 
-  const updateOrderStatus = (orderId: string, status: OrderStatus) => {
+  const updateOrderStatus = async (orderId: string, status: OrderStatus) => {
     setOrders((prev) =>
       prev.map((o) => (o.id === orderId || o.orderNumber === orderId ? { ...o, status } : o))
     );
-    SupabaseAPI.updateOrderStatus(orderId, status);
+    await SupabaseAPI.updateOrderStatus(orderId, status);
   };
 
-  const deleteOrder = (orderId: string) => {
+  const deleteOrder = async (orderId: string) => {
     setOrders((prev) => prev.filter((o) => o.id !== orderId && o.orderNumber !== orderId));
-    SupabaseAPI.deleteOrder(orderId);
+    await SupabaseAPI.deleteOrder(orderId);
   };
 
-  // Settings Management
-  const updateStoreSettings = (newSettings: Partial<StoreSettings>) => {
+  // 3. Settings Management (Pure Supabase)
+  const updateStoreSettings = async (newSettings: Partial<StoreSettings>) => {
     const updated = { ...storeSettings, ...newSettings };
     setStoreSettings(updated);
-    SupabaseAPI.saveSettings(updated);
+    await SupabaseAPI.saveSettings(updated);
   };
 
-  // Shipping Rates Management
-  const updateShippingState = (code: string, fee: number, deliveryDays: string) => {
+  // 4. Shipping Rates Management (Pure Supabase)
+  const updateShippingState = async (code: string, fee: number, deliveryDays: string) => {
     setShippingStates((prev) =>
       prev.map((s) => (s.code === code ? { ...s, fee: Number(fee), deliveryDays } : s))
     );
-    SupabaseAPI.updateShippingState(code, fee, deliveryDays);
-  };
-
-  // Reset to Factory Defaults
-  const resetToDefaults = () => {
-    if (window.confirm('Are you sure you want to reset all products, shipping rates, and store settings to defaults? This will erase custom products and settings.')) {
-      setProducts(PRODUCTS);
-      setStoreSettings(DEFAULT_SETTINGS);
-      setShippingStates(NIGERIAN_STATES);
-      localStorage.removeItem(STORAGE_KEYS.PRODUCTS);
-      localStorage.removeItem(STORAGE_KEYS.SETTINGS);
-      localStorage.removeItem(STORAGE_KEYS.SHIPPING);
-    }
+    await SupabaseAPI.updateShippingState(code, fee, deliveryDays);
   };
 
   return (
@@ -334,10 +204,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         orders,
         storeSettings,
         shippingStates,
-        isCloudConnected,
-        cloudUrl,
-        cloudKey,
-        connectCloudDatabase,
+        isLoading,
         addProduct,
         updateProduct,
         deleteProduct,
@@ -347,8 +214,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         deleteOrder,
         updateStoreSettings,
         updateShippingState,
-        resetToDefaults,
-        syncFromCloud,
+        refreshFromSupabase,
       }}
     >
       {children}
