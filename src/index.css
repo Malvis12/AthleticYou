@@ -1,0 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800;900&family=Space+Grotesk:wght@600;700&family=Syne:wght@700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-onyx: #08080A;
+    --bg-pure: #000000;
+    --card-slate: #121214;
+    --card-slate-hover: #1A1A1E;
+    --accent-purple: #7B2CBF;
+    --accent-purple-glow: rgba(123, 44, 191, 0.4);
+    --accent-purple-light: #9D4EDD;
+    --accent-gold: #E2B874;
+    --border-glass: rgba(255, 255, 255, 0.07);
+    --border-glass-hover: rgba(255, 255, 255, 0.16);
+    --text-pure: #F5F5F7;
+    --text-muted: #86868B;
+    --text-dark: #424245;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--bg-onyx);
+    color: var(--text-pure);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #08080A;
+}
+::-webkit-scrollbar-thumb {
+  background: #1F1F24;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #7B2CBF;
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+  background: rgba(18, 18, 20, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-hover {
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.glass-panel-hover:hover {
+  background: rgba(26, 26, 30, 0.85);
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-2px);
+}
+
+/* Noise overlay utility */
+.bg-noise {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* Text Gradients */
+.text-gradient-purple {
+  background: linear-gradient(135deg, #FFFFFF 30%, #9D4EDD 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #FFF1DB 20%, #E2B874 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Animated Ambient Background Gradient */
+@keyframes ambientGradientPulse {
+  0% {
+    background-position: 0% 0%, 100% 100%, 50% 50%;
+  }
+  50% {
+    background-position: 100% 50%, 0% 50%, 80% 20%;
+  }
+  100% {
+    background-position: 0% 0%, 100% 100%, 50% 50%;
+  }
+}
+
+.ambient-gradient-bg {
+  background-color: #08080A;
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(123, 44, 191, 0.18) 0%, transparent 45%),
+    radial-gradient(circle at 90% 60%, rgba(157, 78, 221, 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 50% 90%, rgba(226, 184, 116, 0.06) 0%, transparent 40%);
+  background-size: 150% 150%, 160% 160%, 140% 140%;
+  animation: ambientGradientPulse 20s ease-in-out infinite;
+}
+
+/* Shimmer animation */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2.5s infinite;
+}

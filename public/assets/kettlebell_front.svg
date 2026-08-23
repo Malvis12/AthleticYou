@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+        
+            <rect width="100%" height="100%" fill="#161618"/>
+            <circle cx="200" cy="160" r="100" fill="#7B2CBF" opacity="0.1" filter="blur(20px)"/>
+            <path d="M 130,160 C 130,70 270,70 270,160" fill="none" stroke="#222222" stroke-width="30" stroke-linecap="round"/>
+            <path d="M 130,160 C 130,75 270,75 270,160" fill="none" stroke="#333333" stroke-width="24" stroke-linecap="round"/>
+            <circle cx="200" cy="190" r="75" fill="#1A1A1C" stroke="#2D2D30" stroke-width="2"/>
+            <circle cx="200" cy="190" r="70" fill="#121214"/>
+            <g transform="translate(170, 140) scale(0.6)">
+                <g id="ay-logo">
+    <polygon points="50,15 15,75 85,75" fill="none" stroke="#7B2CBF" stroke-width="6" stroke-linejoin="round"/>
+    <polygon points="50,30 28,70 72,70" fill="#7B2CBF"/>
+    <text x="50" y="92" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">ATHLETIC YOU</text>
+</g>
+            </g>
+            <text x="200" y="240" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="900" fill="#7B2CBF" text-anchor="middle">24 KG</text>
+        
+    </svg>
