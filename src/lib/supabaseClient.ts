@@ -1,16 +1,20 @@
 import { Product } from '../types/product';
 import { CustomerOrder, OrderStatus, StoreSettings, NigerianStateSetting } from '../types/store';
 
-// Reads from .env or localStorage (if configured via CMS Settings)
+const DEFAULT_SUPABASE_URL = 'https://dfkcvrluvvuirwestatp.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRma2N2cmx1dnZ1aXJ3ZXN0YXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1MDQ0OTEsImV4cCI6MjEwMzA4MDQ5MX0.iZXXsgJp4vDlrJfvAEM9PvVqQMyyzH09H0lEbpbIdhs';
+
+// Reads from localStorage, environment variables, or hardcoded project defaults
 export const getSupabaseConfig = () => {
-  const envUrl = import.meta.env.VITE_SUPABASE_URL || '';
-  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+  const envUrl = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) || '';
+  const envKey = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_ANON_KEY) || '';
 
   const storedUrl = localStorage.getItem('ay_supabase_url') || '';
   const storedKey = localStorage.getItem('ay_supabase_key') || '';
 
-  const url = (storedUrl || envUrl).trim().replace(/\/$/, '');
-  const anonKey = (storedKey || envKey).trim();
+  const url = (storedUrl || envUrl || DEFAULT_SUPABASE_URL).trim().replace(/\/$/, '');
+  const anonKey = (storedKey || envKey || DEFAULT_SUPABASE_ANON_KEY).trim();
 
   return {
     url,
@@ -38,11 +42,13 @@ export const SupabaseAPI = {
     if (!isConfigured) return null;
 
     try {
-      const res = await fetch(`${url}/rest/v1/products?select=*&order=created_at.desc`, {
+      const res = await fetch(`${url}/rest/v1/products?select=*&order=created_at.asc`, {
         headers: getHeaders(anonKey),
       });
       if (!res.ok) throw new Error(`HTTP error ${res.status}`);
       const data = await res.json();
+      if (!data || !Array.isArray(data)) return null;
+
       return data.map((row: any) => ({
         id: row.id,
         name: row.name,
