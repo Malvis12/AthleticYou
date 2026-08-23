@@ -33,15 +33,17 @@ interface StoreContextType {
   storeSettings: StoreSettings;
   shippingStates: NigerianStateSetting[];
   isLoading: boolean;
-  addProduct: (productData: Omit<Product, 'id' | 'slug' | 'images' | 'rating' | 'reviewCount' | 'features' | 'specifications' | 'includedItems'> & { imageUrl: string }) => Promise<void>;
-  updateProduct: (id: string, updates: Partial<Product> & { imageUrl?: string }) => Promise<void>;
-  deleteProduct: (id: string) => Promise<void>;
-  toggleProductStock: (id: string) => Promise<void>;
+  dbError: string | null;
+  clearDbError: () => void;
+  addProduct: (productData: Omit<Product, 'id' | 'slug' | 'images' | 'rating' | 'reviewCount' | 'features' | 'specifications' | 'includedItems'> & { imageUrl: string }) => Promise<boolean>;
+  updateProduct: (id: string, updates: Partial<Product> & { imageUrl?: string }) => Promise<boolean>;
+  deleteProduct: (id: string) => Promise<boolean>;
+  toggleProductStock: (id: string) => Promise<boolean>;
   addOrder: (orderData: Omit<CustomerOrder, 'id' | 'createdAt' | 'status'>) => Promise<CustomerOrder>;
-  updateOrderStatus: (orderId: string, status: OrderStatus) => Promise<void>;
-  deleteOrder: (orderId: string) => Promise<void>;
-  updateStoreSettings: (settings: Partial<StoreSettings>) => Promise<void>;
-  updateShippingState: (code: string, fee: number, deliveryDays: string) => Promise<void>;
+  updateOrderStatus: (orderId: string, status: OrderStatus) => Promise<boolean>;
+  deleteOrder: (orderId: string) => Promise<boolean>;
+  updateStoreSettings: (settings: Partial<StoreSettings>) => Promise<boolean>;
+  updateShippingState: (code: string, fee: number, deliveryDays: string) => Promise<boolean>;
   refreshFromSupabase: () => Promise<void>;
 }
 
@@ -53,6 +55,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [storeSettings, setStoreSettings] = useState<StoreSettings>(DEFAULT_SETTINGS);
   const [shippingStates, setShippingStates] = useState<NigerianStateSetting[]>(NIGERIAN_STATES);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [dbError, setDbError] = useState<string | null>(null);
+
+  const clearDbError = () => setDbError(null);
 
   // Pure Supabase Sync on Mount
   const refreshFromSupabase = async () => {
@@ -77,8 +82,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (cloudShipping && cloudShipping.length > 0) {
         setShippingStates(cloudShipping);
       }
-    } catch (err) {
+      setDbError(null);
+    } catch (err: any) {
       console.error('[Supabase] Initial fetch error:', err);
+      setDbError(`Failed to fetch from Supabase database: ${err?.message || err}`);
     } finally {
       setIsLoading(false);
     }
@@ -88,10 +95,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     refreshFromSupabase();
   }, []);
 
-  // 1. Product CRUD (Pure Supabase)
+  // 1. Product CRUD (Pure Supabase with Error Catching)
   const addProduct = async (
     productData: Omit<Product, 'id' | 'slug' | 'images' | 'rating' | 'reviewCount' | 'features' | 'specifications' | 'includedItems'> & { imageUrl: string }
-  ) => {
+  ): Promise<boolean> => {
     const slug = productData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const newProduct: Product = {
       id: `p-${Date.now()}`,
@@ -115,11 +122,24 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       inStock: productData.inStock !== false,
     };
 
+    const res = await SupabaseAPI.insertProduct(newProduct);
+    if (!res.success) {
+      setDbError(`Failed to insert product "${productData.name}": ${res.error}`);
+      return false;
+    }
+
     setProducts((prev) => [newProduct, ...prev]);
-    await SupabaseAPI.insertProduct(newProduct);
+    setDbError(null);
+    return true;
   };
 
-  const updateProduct = async (id: string, updates: Partial<Product> & { imageUrl?: string }) => {
+  const updateProduct = async (id: string, updates: Partial<Product> & { imageUrl?: string }): Promise<boolean> => {
+    const res = await SupabaseAPI.updateProduct(id, updates);
+    if (!res.success) {
+      setDbError(`Failed to update product (ID: ${id}): ${res.error}`);
+      return false;
+    }
+
     setProducts((prev) =>
       prev.map((p) => {
         if (p.id === id) {
@@ -137,26 +157,41 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return p;
       })
     );
-    await SupabaseAPI.updateProduct(id, updates);
+    setDbError(null);
+    return true;
   };
 
-  const deleteProduct = async (id: string) => {
+  const deleteProduct = async (id: string): Promise<boolean> => {
+    const res = await SupabaseAPI.deleteProduct(id);
+    if (!res.success) {
+      setDbError(`Failed to delete product (ID: ${id}): ${res.error}`);
+      return false;
+    }
+
     setProducts((prev) => prev.filter((p) => p.id !== id));
-    await SupabaseAPI.deleteProduct(id);
+    setDbError(null);
+    return true;
   };
 
-  const toggleProductStock = async (id: string) => {
+  const toggleProductStock = async (id: string): Promise<boolean> => {
     const target = products.find((p) => p.id === id);
-    if (!target) return;
+    if (!target) return false;
     const newStock = target.inStock === false;
+
+    const res = await SupabaseAPI.updateProduct(id, { inStock: newStock });
+    if (!res.success) {
+      setDbError(`Failed to toggle product stock (ID: ${id}): ${res.error}`);
+      return false;
+    }
 
     setProducts((prev) =>
       prev.map((p) => (p.id === id ? { ...p, inStock: newStock } : p))
     );
-    await SupabaseAPI.updateProduct(id, { inStock: newStock });
+    setDbError(null);
+    return true;
   };
 
-  // 2. Orders Management (Pure Supabase)
+  // 2. Orders Management (Pure Supabase with Error Catching)
   const addOrder = async (orderData: Omit<CustomerOrder, 'id' | 'createdAt' | 'status'>): Promise<CustomerOrder> => {
     const newOrder: CustomerOrder = {
       ...orderData,
@@ -165,36 +200,70 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       status: 'pending',
     };
 
+    const res = await SupabaseAPI.insertOrder(newOrder);
+    if (!res.success) {
+      setDbError(`Failed to save customer order: ${res.error}`);
+    } else {
+      setDbError(null);
+    }
+
     setOrders((prev) => [newOrder, ...prev]);
-    await SupabaseAPI.insertOrder(newOrder);
     return newOrder;
   };
 
-  const updateOrderStatus = async (orderId: string, status: OrderStatus) => {
+  const updateOrderStatus = async (orderId: string, status: OrderStatus): Promise<boolean> => {
+    const res = await SupabaseAPI.updateOrderStatus(orderId, status);
+    if (!res.success) {
+      setDbError(`Failed to update order status (Order: ${orderId}): ${res.error}`);
+      return false;
+    }
+
     setOrders((prev) =>
       prev.map((o) => (o.id === orderId || o.orderNumber === orderId ? { ...o, status } : o))
     );
-    await SupabaseAPI.updateOrderStatus(orderId, status);
+    setDbError(null);
+    return true;
   };
 
-  const deleteOrder = async (orderId: string) => {
+  const deleteOrder = async (orderId: string): Promise<boolean> => {
+    const res = await SupabaseAPI.deleteOrder(orderId);
+    if (!res.success) {
+      setDbError(`Failed to delete order (Order: ${orderId}): ${res.error}`);
+      return false;
+    }
+
     setOrders((prev) => prev.filter((o) => o.id !== orderId && o.orderNumber !== orderId));
-    await SupabaseAPI.deleteOrder(orderId);
+    setDbError(null);
+    return true;
   };
 
-  // 3. Settings Management (Pure Supabase)
-  const updateStoreSettings = async (newSettings: Partial<StoreSettings>) => {
+  // 3. Settings Management (Pure Supabase with Error Catching)
+  const updateStoreSettings = async (newSettings: Partial<StoreSettings>): Promise<boolean> => {
     const updated = { ...storeSettings, ...newSettings };
+    const res = await SupabaseAPI.saveSettings(updated);
+    if (!res.success) {
+      setDbError(`Failed to save store settings to Supabase: ${res.error}`);
+      return false;
+    }
+
     setStoreSettings(updated);
-    await SupabaseAPI.saveSettings(updated);
+    setDbError(null);
+    return true;
   };
 
-  // 4. Shipping Rates Management (Pure Supabase)
-  const updateShippingState = async (code: string, fee: number, deliveryDays: string) => {
+  // 4. Shipping Rates Management (Pure Supabase with Error Catching)
+  const updateShippingState = async (code: string, fee: number, deliveryDays: string): Promise<boolean> => {
+    const res = await SupabaseAPI.updateShippingState(code, fee, deliveryDays);
+    if (!res.success) {
+      setDbError(`Failed to update shipping rate for state "${code}": ${res.error}`);
+      return false;
+    }
+
     setShippingStates((prev) =>
       prev.map((s) => (s.code === code ? { ...s, fee: Number(fee), deliveryDays } : s))
     );
-    await SupabaseAPI.updateShippingState(code, fee, deliveryDays);
+    setDbError(null);
+    return true;
   };
 
   return (
@@ -205,6 +274,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         storeSettings,
         shippingStates,
         isLoading,
+        dbError,
+        clearDbError,
         addProduct,
         updateProduct,
         deleteProduct,

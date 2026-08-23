@@ -12,6 +12,26 @@ const getHeaders = () => ({
   Prefer: 'return=representation',
 });
 
+export interface SupabaseResult<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
+
+const parseError = async (res: Response): Promise<string> => {
+  try {
+    const json = await res.json();
+    return json.message || json.error || json.hint || JSON.stringify(json);
+  } catch {
+    try {
+      const text = await res.text();
+      return text || `HTTP ${res.status}: ${res.statusText}`;
+    } catch {
+      return `HTTP ${res.status}: ${res.statusText}`;
+    }
+  }
+};
+
 export const SupabaseAPI = {
   // 1. PRODUCTS (Pure Supabase)
   async getProducts(): Promise<Product[]> {
@@ -19,7 +39,7 @@ export const SupabaseAPI = {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=created_at.asc`, {
         headers: getHeaders(),
       });
-      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+      if (!res.ok) throw new Error(await parseError(res));
       const data = await res.json();
       if (!data || !Array.isArray(data)) return [];
 
@@ -44,13 +64,13 @@ export const SupabaseAPI = {
         includedItems: [],
         inStock: row.in_stock !== false,
       }));
-    } catch (err) {
+    } catch (err: any) {
       console.error('[Supabase] Error fetching products:', err);
       return [];
     }
   },
 
-  async insertProduct(product: Product): Promise<boolean> {
+  async insertProduct(product: Product): Promise<SupabaseResult> {
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/products`, {
         method: 'POST',
@@ -69,14 +89,18 @@ export const SupabaseAPI = {
           in_stock: product.inStock !== false,
         }),
       });
-      return res.ok;
-    } catch (err) {
-      console.error('[Supabase] Error inserting product:', err);
-      return false;
+      if (!res.ok) {
+        const errorMsg = await parseError(res);
+        return { success: false, error: errorMsg };
+      }
+      return { success: true };
+    } catch (err: any) {
+      const msg = err?.message || 'Network / CORS error connecting to Supabase database';
+      return { success: false, error: msg };
     }
   },
 
-  async updateProduct(id: string, updates: Partial<Product> & { imageUrl?: string }): Promise<boolean> {
+  async updateProduct(id: string, updates: Partial<Product> & { imageUrl?: string }): Promise<SupabaseResult> {
     const payload: any = {};
     if (updates.name !== undefined) payload.name = updates.name;
     if (updates.category !== undefined) payload.category = updates.category;
@@ -94,23 +118,31 @@ export const SupabaseAPI = {
         headers: getHeaders(),
         body: JSON.stringify(payload),
       });
-      return res.ok;
-    } catch (err) {
-      console.error('[Supabase] Error updating product:', err);
-      return false;
+      if (!res.ok) {
+        const errorMsg = await parseError(res);
+        return { success: false, error: errorMsg };
+      }
+      return { success: true };
+    } catch (err: any) {
+      const msg = err?.message || 'Network / CORS error connecting to Supabase database';
+      return { success: false, error: msg };
     }
   },
 
-  async deleteProduct(id: string): Promise<boolean> {
+  async deleteProduct(id: string): Promise<SupabaseResult> {
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${id}`, {
         method: 'DELETE',
         headers: getHeaders(),
       });
-      return res.ok;
-    } catch (err) {
-      console.error('[Supabase] Error deleting product:', err);
-      return false;
+      if (!res.ok) {
+        const errorMsg = await parseError(res);
+        return { success: false, error: errorMsg };
+      }
+      return { success: true };
+    } catch (err: any) {
+      const msg = err?.message || 'Network / CORS error connecting to Supabase database';
+      return { success: false, error: msg };
     }
   },
 
@@ -120,7 +152,7 @@ export const SupabaseAPI = {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?select=*&order=created_at.desc`, {
         headers: getHeaders(),
       });
-      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+      if (!res.ok) throw new Error(await parseError(res));
       const data = await res.json();
       if (!data || !Array.isArray(data)) return [];
 
@@ -143,13 +175,13 @@ export const SupabaseAPI = {
         shippingFee: Number(row.shipping_fee),
         grandTotal: Number(row.grand_total),
       }));
-    } catch (err) {
+    } catch (err: any) {
       console.error('[Supabase] Error fetching orders:', err);
       return [];
     }
   },
 
-  async insertOrder(order: CustomerOrder): Promise<boolean> {
+  async insertOrder(order: CustomerOrder): Promise<SupabaseResult> {
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
         method: 'POST',
@@ -174,37 +206,49 @@ export const SupabaseAPI = {
           created_at: order.createdAt,
         }),
       });
-      return res.ok;
-    } catch (err) {
-      console.error('[Supabase] Error inserting order:', err);
-      return false;
+      if (!res.ok) {
+        const errorMsg = await parseError(res);
+        return { success: false, error: errorMsg };
+      }
+      return { success: true };
+    } catch (err: any) {
+      const msg = err?.message || 'Network / CORS error connecting to Supabase database';
+      return { success: false, error: msg };
     }
   },
 
-  async updateOrderStatus(id: string, status: OrderStatus): Promise<boolean> {
+  async updateOrderStatus(id: string, status: OrderStatus): Promise<SupabaseResult> {
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${id}`, {
         method: 'PATCH',
         headers: getHeaders(),
         body: JSON.stringify({ status }),
       });
-      return res.ok;
-    } catch (err) {
-      console.error('[Supabase] Error updating order status:', err);
-      return false;
+      if (!res.ok) {
+        const errorMsg = await parseError(res);
+        return { success: false, error: errorMsg };
+      }
+      return { success: true };
+    } catch (err: any) {
+      const msg = err?.message || 'Network / CORS error connecting to Supabase database';
+      return { success: false, error: msg };
     }
   },
 
-  async deleteOrder(id: string): Promise<boolean> {
+  async deleteOrder(id: string): Promise<SupabaseResult> {
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${id}`, {
         method: 'DELETE',
         headers: getHeaders(),
       });
-      return res.ok;
-    } catch (err) {
-      console.error('[Supabase] Error deleting order:', err);
-      return false;
+      if (!res.ok) {
+        const errorMsg = await parseError(res);
+        return { success: false, error: errorMsg };
+      }
+      return { success: true };
+    } catch (err: any) {
+      const msg = err?.message || 'Network / CORS error connecting to Supabase database';
+      return { success: false, error: msg };
     }
   },
 
@@ -232,13 +276,13 @@ export const SupabaseAPI = {
         heroImageUrl: row.hero_image_url || '/Dumbbell.jpg',
         marqueeTexts: Array.isArray(row.marquee_texts) ? row.marquee_texts : JSON.parse(row.marquee_texts || '[]'),
       };
-    } catch (err) {
+    } catch (err: any) {
       console.error('[Supabase] Error fetching settings:', err);
       return null;
     }
   },
 
-  async saveSettings(settings: StoreSettings): Promise<boolean> {
+  async saveSettings(settings: StoreSettings): Promise<SupabaseResult> {
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/store_settings?id=eq.default`, {
         method: 'PATCH',
@@ -258,10 +302,14 @@ export const SupabaseAPI = {
           marquee_texts: settings.marqueeTexts,
         }),
       });
-      return res.ok;
-    } catch (err) {
-      console.error('[Supabase] Error saving settings:', err);
-      return false;
+      if (!res.ok) {
+        const errorMsg = await parseError(res);
+        return { success: false, error: errorMsg };
+      }
+      return { success: true };
+    } catch (err: any) {
+      const msg = err?.message || 'Network / CORS error connecting to Supabase database';
+      return { success: false, error: msg };
     }
   },
 
@@ -280,13 +328,13 @@ export const SupabaseAPI = {
         fee: Number(r.fee),
         deliveryDays: r.delivery_days,
       }));
-    } catch (err) {
+    } catch (err: any) {
       console.error('[Supabase] Error fetching shipping rates:', err);
       return [];
     }
   },
 
-  async updateShippingState(code: string, fee: number, deliveryDays: string): Promise<boolean> {
+  async updateShippingState(code: string, fee: number, deliveryDays: string): Promise<SupabaseResult> {
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/shipping_rates?code=eq.${code}`, {
         method: 'PATCH',
@@ -296,10 +344,14 @@ export const SupabaseAPI = {
           delivery_days: deliveryDays,
         }),
       });
-      return res.ok;
-    } catch (err) {
-      console.error('[Supabase] Error updating shipping rate:', err);
-      return false;
+      if (!res.ok) {
+        const errorMsg = await parseError(res);
+        return { success: false, error: errorMsg };
+      }
+      return { success: true };
+    } catch (err: any) {
+      const msg = err?.message || 'Network / CORS error connecting to Supabase database';
+      return { success: false, error: msg };
     }
   },
 };
